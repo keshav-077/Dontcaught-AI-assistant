@@ -19,6 +19,16 @@ pub fn setup_main_window(app: &mut App) -> Result<(), Box<dyn std::error::Error>
 
     position_window_top_center(&window, TOP_OFFSET)?;
 
+    // Load and apply saved taskbar visibility preference
+    let window_clone = window.clone();
+    tauri::async_runtime::spawn(async move {
+        // Default to true (hide from taskbar) on startup
+        // The frontend will load the actual saved preference and update if needed
+        if let Err(e) = window_clone.set_skip_taskbar(true) {
+            eprintln!("Failed to apply default skip_taskbar setting on startup: {}", e);
+        }
+    });
+
     // Set window as non-focusable on Windows
     // #[cfg(target_os = "windows")]
     // {
@@ -220,5 +230,28 @@ pub fn show_dashboard_window<R: Runtime>(app: &AppHandle<R>) -> Result<(), Strin
             .set_focus()
             .map_err(|e| format!("Failed to focus new dashboard window: {}", e))?;
     }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_skip_taskbar() -> Result<bool, String> {
+    // This command is now a simple getter that returns the default value
+    // The actual database operations are handled by the frontend using tauri-plugin-sql
+    // This command exists for compatibility and returns the default value
+    Ok(true)
+}
+
+#[tauri::command]
+pub fn set_skip_taskbar(
+    window: tauri::WebviewWindow,
+    skip: bool,
+) -> Result<(), String> {
+    // Update the window's skip_taskbar property immediately
+    window
+        .set_skip_taskbar(skip)
+        .map_err(|e| format!("Failed to set window skip_taskbar property: {}", e))?;
+
+    // Database persistence is handled by the frontend using tauri-plugin-sql
+    // This ensures the setting is applied immediately to the window
     Ok(())
 }
