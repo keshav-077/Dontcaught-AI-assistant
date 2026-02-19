@@ -52,7 +52,7 @@ const Dashboard = () => {
       description="License to unlock faster responses, quicker support and premium features."
       rightSlot={!hasActiveLicense ? <GetLicense /> : null}
     >
-      {/* Pluely API Setup */}
+      {/* API Setup */}
       <PluelyApiSetup />
 
       <Usage
