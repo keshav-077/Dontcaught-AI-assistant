@@ -5,6 +5,8 @@ import {
   SelectTrigger,
   Header,
   Button,
+  Switch,
+  Label,
 } from "@/components";
 import { MicIcon, RefreshCwIcon, HeadphonesIcon } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -14,7 +16,7 @@ import { safeLocalStorage } from "@/lib/storage";
 import { invoke } from "@tauri-apps/api/core";
 
 export const AudioSelection = () => {
-  const { selectedAudioDevices, setSelectedAudioDevices } = useApp();
+  const { selectedAudioDevices, setSelectedAudioDevices, unifiedAudioEnabled, setUnifiedAudioEnabled } = useApp();
 
   const [isLoadingDevices, setIsLoadingDevices] = useState(false);
   const [showSuccess, setShowSuccess] = useState<{
@@ -132,6 +134,36 @@ export const AudioSelection = () => {
 
   return (
     <div id="audio" className="space-y-1 flex flex-col gap-4">
+      {/* Unified Audio Interface Toggle */}
+      <div className="space-y-3">
+        <Header
+          title="Unified Dual-Audio Interface"
+          description="Enable the unified interface to capture both microphone and system audio simultaneously in a single view."
+        />
+        
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
+          <div className="space-y-1">
+            <Label htmlFor="unified-audio-toggle" className="text-sm font-medium">
+              Enable Unified Interface
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Replaces separate audio buttons with a unified dual-audio capture interface
+            </p>
+          </div>
+          <Switch
+            id="unified-audio-toggle"
+            checked={unifiedAudioEnabled}
+            onCheckedChange={setUnifiedAudioEnabled}
+          />
+        </div>
+
+        {unifiedAudioEnabled && (
+          <div className="text-xs text-blue-500 bg-blue-500/10 p-3 rounded-md">
+            <strong>ℹ️ Unified Interface Active:</strong> The main interface now shows a combined audio button that captures both microphone and system audio simultaneously. You can still configure individual devices below.
+          </div>
+        )}
+      </div>
+
       {/* Microphone Input Section */}
       <div className="space-y-3">
         <Header

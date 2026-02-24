@@ -25,7 +25,7 @@ export const DragButton = () => {
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="border-none hover:bg-transparent">
-          <Button variant="ghost" size="icon" className={`-ml-[2px] w-fit`}>
+          <Button variant="ghost" size="icon" className={`-ml-[2px] w-fit cursor-default`} style={{ cursor: 'default' }}>
             <GripVerticalIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
@@ -57,8 +57,8 @@ export const DragButton = () => {
     <Button
       variant="ghost"
       size="icon"
-      className={`-ml-[2px] w-fit`}
-      data-tauri-drag-region={hasActiveLicense}
+      className={`-ml-[2px] w-fit cursor-default`}
+      style={{ cursor: 'default' }}
     >
       <GripVerticalIcon className="h-4 w-4" />
     </Button>

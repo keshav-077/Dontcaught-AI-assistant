@@ -1,4 +1,4 @@
-import { Card, Updater, DragButton, CustomCursor, Button } from "@/components";
+import { Card, Updater, DragButton, CustomCursor, Button, DualAudioInterface } from "@/components";
 import {
   SystemAudio,
   Completion,
@@ -15,7 +15,7 @@ import { getPlatform } from "@/lib";
 
 const App = () => {
   const { isHidden, systemAudio } = useApp();
-  const { customizable } = useAppContext();
+  const { customizable, unifiedAudioEnabled } = useAppContext();
   const platform = getPlatform();
 
   const openDashboard = async () => {
@@ -40,9 +40,16 @@ const App = () => {
         className={`w-screen h-screen flex overflow-hidden justify-center items-start ${
           isHidden ? "hidden pointer-events-none" : ""
         }`}
+        style={{ cursor: 'default !important' }}
       >
-        <Card className="w-full flex flex-row items-center gap-2 p-2">
-          <SystemAudio {...systemAudio} />
+        <div style={{ cursor: 'default', WebkitAppRegion: 'no-drag' } as React.CSSProperties} className="w-full">
+          <Card className="w-full flex flex-row items-center gap-2 p-2 cursor-default" style={{ cursor: 'default' }}>
+          {/* Conditionally render based on unified audio feature flag */}
+          {unifiedAudioEnabled ? (
+            <DualAudioInterface />
+          ) : (
+            <SystemAudio {...systemAudio} />
+          )}
           {systemAudio?.capturing ? (
             <div className="flex flex-row items-center gap-2 justify-between w-full">
               <div className="flex flex-1 items-center gap-2">
@@ -81,6 +88,7 @@ const App = () => {
           <Updater />
           <DragButton />
         </Card>
+        </div>
         {customizable.cursor.type === "invisible" && platform !== "linux" ? (
           <CustomCursor />
         ) : null}

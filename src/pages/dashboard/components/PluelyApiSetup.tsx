@@ -260,7 +260,7 @@ export const PluelyApiSetup = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !storedLicenseKey) {
+    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !storedLicenseKey) {
       handleActivateLicense();
     }
   };

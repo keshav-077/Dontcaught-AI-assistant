@@ -148,6 +148,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     safeLocalStorage.getItem(STORAGE_KEYS.PLUELY_API_ENABLED) === "true"
   );
 
+  // Unified Dual Audio Interface State
+  const [unifiedAudioEnabled, setUnifiedAudioEnabledState] = useState<boolean>(
+    safeLocalStorage.getItem(STORAGE_KEYS.UNIFIED_AUDIO_ENABLED) === "true"
+  );
+
   const getActiveLicenseStatus = async () => {
     const response: { is_active: boolean; is_dev_license: boolean } =
       await invoke("validate_license_api");
@@ -282,6 +287,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     );
     if (savedPluelyApiEnabled !== null) {
       setPluelyApiEnabledState(savedPluelyApiEnabled === "true");
+    }
+
+    // Load unified audio enabled state
+    const savedUnifiedAudioEnabled = safeLocalStorage.getItem(
+      STORAGE_KEYS.UNIFIED_AUDIO_ENABLED
+    );
+    if (savedUnifiedAudioEnabled !== null) {
+      setUnifiedAudioEnabledState(savedUnifiedAudioEnabled === "true");
     }
 
     // Load selected audio devices
@@ -652,6 +665,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     loadData();
   };
 
+  const setUnifiedAudioEnabled = (enabled: boolean) => {
+    setUnifiedAudioEnabledState(enabled);
+    safeLocalStorage.setItem(STORAGE_KEYS.UNIFIED_AUDIO_ENABLED, String(enabled));
+    loadData();
+  };
+
   // Create the context value (extend IContextType accordingly)
   const value: IContextType = {
     systemPrompt,
@@ -681,6 +700,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setCursorType,
     supportsImages,
     setSupportsImages,
+    unifiedAudioEnabled,
+    setUnifiedAudioEnabled,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

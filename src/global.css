@@ -168,6 +168,17 @@
   cursor: var(--cursor-type) !important;
 }
 
+/* Override Tauri drag region cursor - multiple attempts for maximum specificity */
+[data-tauri-drag-region="true"],
+[data-tauri-drag-region="true"] *,
+[data-tauri-drag-region],
+[data-tauri-drag-region] *,
+button[data-tauri-drag-region],
+button[data-tauri-drag-region] * {
+  cursor: default !important;
+  -webkit-app-region: no-drag !important;
+}
+
 html {
   overscroll-behavior: none;
 }

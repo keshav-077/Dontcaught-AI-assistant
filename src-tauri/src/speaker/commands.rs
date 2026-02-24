@@ -491,6 +491,43 @@ pub async fn stop_system_audio_capture(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// Switch system audio device during capture (hot-swap)
+#[tauri::command]
+pub async fn switch_system_audio_device(
+    app: AppHandle,
+    device_id: Option<String>,
+) -> Result<(), String> {
+    let state = app.state::<crate::AudioState>();
+    
+    // Check if currently capturing
+    let is_capturing = *state
+        .is_capturing
+        .lock()
+        .map_err(|e| format!("Failed to check capture status: {}", e))?;
+    
+    if !is_capturing {
+        return Err("Not currently capturing".to_string());
+    }
+    
+    // Get current VAD config
+    let vad_config = state
+        .vad_config
+        .lock()
+        .map_err(|e| format!("Failed to get VAD config: {}", e))?
+        .clone();
+    
+    // Stop current capture
+    stop_system_audio_capture(app.clone()).await?;
+    
+    // Small delay to ensure cleanup
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    
+    // Start capture with new device
+    start_system_audio_capture(app, Some(vad_config), device_id).await?;
+    
+    Ok(())
+}
+
 /// Manual stop for continuous recording
 #[tauri::command]
 pub async fn manual_stop_continuous(app: AppHandle) -> Result<(), String> {

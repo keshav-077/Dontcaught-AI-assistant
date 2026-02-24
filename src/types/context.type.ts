@@ -58,4 +58,6 @@ export type IContextType = {
   setCursorType: (type: CursorType) => void;
   supportsImages: boolean;
   setSupportsImages: (value: boolean) => void;
+  unifiedAudioEnabled: boolean;
+  setUnifiedAudioEnabled: (enabled: boolean) => void;
 };

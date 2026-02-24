@@ -10,6 +10,7 @@ use tauri::{AppHandle, Manager, WebviewWindow};
 use tauri_plugin_posthog::{init as posthog_init, PostHogConfig, PostHogOptions};
 use tokio::task::JoinHandle;
 mod speaker;
+mod microphone;
 use capture::CaptureState;
 use speaker::VadConfig;
 
@@ -19,6 +20,13 @@ use tauri_nspanel::{cocoa::appkit::NSWindowCollectionBehavior, panel_delegate, W
 
 #[derive(Default)]
 pub struct AudioState {
+    stream_task: Arc<Mutex<Option<JoinHandle<()>>>>,
+    vad_config: Arc<Mutex<VadConfig>>,
+    is_capturing: Arc<Mutex<bool>>,
+}
+
+#[derive(Default)]
+pub struct MicrophoneState {
     stream_task: Arc<Mutex<Option<JoinHandle<()>>>>,
     vad_config: Arc<Mutex<VadConfig>>,
     is_capturing: Arc<Mutex<bool>>,
@@ -40,6 +48,7 @@ pub fn run() {
                 .build(),
         )
         .manage(AudioState::default())
+        .manage(MicrophoneState::default())
         .manage(CaptureState::default())
         .manage(shortcuts::WindowVisibility {
             is_hidden: Mutex::new(false),
@@ -109,6 +118,7 @@ pub fn run() {
             api::get_activity,
             speaker::start_system_audio_capture,
             speaker::stop_system_audio_capture,
+            speaker::switch_system_audio_device,
             speaker::manual_stop_continuous,
             speaker::check_system_audio_access,
             speaker::request_system_audio_access,
@@ -118,6 +128,12 @@ pub fn run() {
             speaker::get_audio_sample_rate,
             speaker::get_input_devices,
             speaker::get_output_devices,
+            microphone::start_microphone_capture,
+            microphone::stop_microphone_capture,
+            microphone::switch_microphone_device,
+            microphone::get_audio_levels,
+            microphone::check_microphone_access,
+            microphone::request_microphone_access,
         ])
         .setup(|app| {
             // Setup main window positioning

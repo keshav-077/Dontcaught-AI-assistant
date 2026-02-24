@@ -5,9 +5,13 @@ import { AppProvider, ThemeProvider } from "./contexts";
 import "./global.css";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import AppRoutes from "./routes";
+import { initializeCursorOverride } from "./lib/cursor-override";
 
 const currentWindow = getCurrentWindow();
 const windowLabel = currentWindow.label;
+
+// Initialize cursor override for drag regions
+initializeCursorOverride();
 
 // Render different components based on window label
 if (windowLabel.startsWith("capture-overlay-")) {

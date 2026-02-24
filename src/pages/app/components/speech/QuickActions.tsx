@@ -118,7 +118,7 @@ export const QuickActions = ({
                 placeholder="Add action..."
                 className="h-7 text-xs w-28"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     handleAdd();
                   }

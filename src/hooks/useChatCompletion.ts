@@ -490,7 +490,7 @@ export const useChatCompletion = (
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       if (!state.isLoading && state.input.trim()) {
         submit();
