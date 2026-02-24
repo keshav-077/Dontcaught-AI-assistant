@@ -559,20 +559,6 @@ pub fn set_app_icon_visibility<R: Runtime>(app: AppHandle<R>, visible: bool) -> 
     Ok(())
 }
 
-/// Tauri command to set always on top state
-#[tauri::command]
-pub fn set_always_on_top<R: Runtime>(app: AppHandle<R>, enabled: bool) -> Result<(), String> {
-    if let Some(window) = app.get_webview_window("main") {
-        window
-            .set_always_on_top(enabled)
-            .map_err(|e| format!("Failed to set always on top: {}", e))?;
-    } else {
-        return Err("Main window not found".to_string());
-    }
-
-    Ok(())
-}
-
 /// Handle toggle dashboard shortcut
 fn handle_toggle_dashboard<R: Runtime>(app: &AppHandle<R>) {
     if let Some(dashboard_window) = app.get_webview_window("dashboard") {

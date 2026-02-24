@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Properties Preservation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            margin-top: 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .property-display {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Window Properties Preservation Test</h1>
+    <p>This test verifies that changing the always-on-top setting preserves other window properties (Requirements 6.1, 6.2, 6.3)</p>
+
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <div class="info">
+            <p><strong>Manual Test Procedure:</strong></p>
+            <ol>
+                <li>Click "Capture Initial State" to record current window properties</li>
+                <li>Click "Toggle Always On Top" to change the setting</li>
+                <li>Click "Verify Properties Preserved" to check if other properties remained unchanged</li>
+                <li>Repeat steps 2-3 multiple times to ensure consistency</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Current Window Properties</h2>
+        <div id="current-properties" class="property-display">
+            Click "Capture Initial State" to display properties
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="captureInitialState()">Capture Initial State</button>
+        <button onclick="toggleAlwaysOnTop()">Toggle Always On Top</button>
+        <button onclick="verifyPropertiesPreserved()">Verify Properties Preserved</button>
+        <button onclick="resetTest()">Reset Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results">
+            No tests run yet
+        </div>
+    </div>
+
+    <script type="module">
+        import { invoke } from '@tauri-apps/api/core';
+        import { getCurrentWindow } from '@tauri-apps/api/window';
+
+        let initialState = null;
+        let currentAlwaysOnTop = true;
+
+        window.captureInitialState = async function() {
+            try {
+                const window = getCurrentWindow();
+                const position = await window.outerPosition();
+                const size = await window.outerSize();
+                
+                initialState = {
+                    position: { x: position.x, y: position.y },
+                    size: { width: size.width, height: size.height },
+                    alwaysOnTop: currentAlwaysOnTop
+                };
+
+                displayProperties(initialState);
+                showResult('Initial state captured successfully', 'success');
+            } catch (error) {
+                showResult(`Error capturing state: ${error}`, 'error');
+            }
+        };
+
+        window.toggleAlwaysOnTop = async function() {
+            if (!initialState) {
+                showResult('Please capture initial state first', 'error');
+                return;
+            }
+
+            try {
+                currentAlwaysOnTop = !currentAlwaysOnTop;
+                await invoke('set_always_on_top', { alwaysOnTop: currentAlwaysOnTop });
+                showResult(`Always-on-top toggled to: ${currentAlwaysOnTop}`, 'success');
+            } catch (error) {
+                showResult(`Error toggling always-on-top: ${error}`, 'error');
+            }
+        };
+
+        window.verifyPropertiesPreserved = async function() {
+            if (!initialState) {
+                showResult('Please capture initial state first', 'error');
+                return;
+            }
+
+            try {
+                const window = getCurrentWindow();
+                const currentPosition = await window.outerPosition();
+                const currentSize = await window.outerSize();
+
+                const results = [];
+                let allPassed = true;
+
+                // Check position preservation (Requirement 6.1)
+                if (currentPosition.x === initialState.position.x && 
+                    currentPosition.y === initialState.position.y) {
+                    results.push('✓ Window position preserved');
+                } else {
+                    results.push(`✗ Window position changed: (${initialState.position.x}, ${initialState.position.y}) → (${currentPosition.x}, ${currentPosition.y})`);
+                    allPassed = false;
+                }
+
+                // Check size preservation (Requirement 6.2)
+                if (currentSize.width === initialState.size.width && 
+                    currentSize.height === initialState.size.height) {
+                    results.push('✓ Window size preserved');
+                } else {
+                    results.push(`✗ Window size changed: ${initialState.size.width}x${initialState.size.height} → ${currentSize.width}x${currentSize.height}`);
+                    allPassed = false;
+                }
+
+                // Check that always-on-top actually changed
+                if (currentAlwaysOnTop !== initialState.alwaysOnTop) {
+                    results.push('✓ Always-on-top setting changed as expected');
+                } else {
+                    results.push('✗ Always-on-top setting did not change');
+                    allPassed = false;
+                }
+
+                const resultHtml = results.map(r => `<p>${r}</p>`).join('');
+                showResult(resultHtml, allPassed ? 'success' : 'error');
+
+                // Update initial state for next iteration
+                initialState.alwaysOnTop = currentAlwaysOnTop;
+            } catch (error) {
+                showResult(`Error verifying properties: ${error}`, 'error');
+            }
+        };
+
+        window.resetTest = function() {
+            initialState = null;
+            currentAlwaysOnTop = true;
+            document.getElementById('current-properties').innerHTML = 'Click "Capture Initial State" to display properties';
+            document.getElementById('test-results').innerHTML = 'Test reset. Click "Capture Initial State" to begin.';
+        };
+
+        function displayProperties(state) {
+            const html = `
+                <strong>Position:</strong> (${state.position.x}, ${state.position.y})<br>
+                <strong>Size:</strong> ${state.size.width} x ${state.size.height}<br>
+                <strong>Always On Top:</strong> ${state.alwaysOnTop}
+            `;
+            document.getElementById('current-properties').innerHTML = html;
+        }
+
+        function showResult(message, type) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML = `<div class="${type}"><strong>[${timestamp}]</strong><br>${message}</div>` + resultsDiv.innerHTML;
+        }
+    </script>
+</body>
+</html>

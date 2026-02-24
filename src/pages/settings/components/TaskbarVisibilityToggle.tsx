@@ -2,7 +2,7 @@ import { Switch, Label, Header } from "@/components";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { updateSkipTaskbar, getCustomizableState } from "@/lib/storage";
-import Database from "@tauri-apps/plugin-sql";
+import { getSkipTaskbarSetting, saveSkipTaskbarSetting } from "@/lib/database";
 
 interface TaskbarVisibilityToggleProps {
   className?: string;
@@ -22,24 +22,12 @@ export const TaskbarVisibilityToggle = ({
         setLoading(true);
         setError(null);
         
-        // Load database
-        const db = await Database.load("sqlite:dontcaught.db");
+        // Load skip_taskbar setting from database
+        const value = await getSkipTaskbarSetting();
+        setSkipTaskbar(value);
         
-        // Query for the skip_taskbar setting
-        const result = await db.select<Array<{ value: string }>>(
-          "SELECT value FROM app_settings WHERE key = 'skip_taskbar'"
-        );
-        
-        if (result.length > 0) {
-          const value = result[0].value === "true";
-          setSkipTaskbar(value);
-          
-          // Apply the setting to the window immediately
-          await invoke("set_skip_taskbar", { skip: value });
-        } else {
-          // No preference exists, use default (true)
-          setSkipTaskbar(true);
-        }
+        // Apply the setting to the window immediately
+        await invoke("set_skip_taskbar", { skip: value });
       } catch (err) {
         console.error("Failed to load skip taskbar setting:", err);
         setError("Failed to load setting");
@@ -65,12 +53,7 @@ export const TaskbarVisibilityToggle = ({
       setSkipTaskbar(checked);
       
       // Persist to database
-      const db = await Database.load("sqlite:dontcaught.db");
-      const value = checked ? "true" : "false";
-      await db.execute(
-        "INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES ('skip_taskbar', $1, datetime('now'))",
-        [value]
-      );
+      await saveSkipTaskbarSetting(checked);
       
       // Update local storage as backup
       updateSkipTaskbar(checked);

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Interaction Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feature Interaction Test: Always-On-Top & Hide-From-Taskbar</h1>
+    
+    <div class="instructions">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>This page tests the interaction between always-on-top and hide-from-taskbar features</li>
+            <li>Click "Run All Tests" to execute automated tests</li>
+            <li>Follow the manual test instructions below</li>
+            <li>Verify that both features work independently</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Automated Tests</h2>
+        <button id="runTests" onclick="runAllTests()">Run All Tests</button>
+        <button id="clearResults" onclick="clearResults()">Clear Results</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Test Controls</h2>
+        <p>Use these buttons to manually test feature combinations:</p>
+        
+        <div style="margin: 20px 0;">
+            <h3>Current Settings</h3>
+            <div id="currentSettings" class="info">
+                <p>Always On Top: <span id="currentAlwaysOnTop">Unknown</span></p>
+                <p>Hide From Taskbar: <span id="currentSkipTaskbar">Unknown</span></p>
+            </div>
+            <button onclick="refreshSettings()">Refresh Settings</button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h3>Test Combinations</h3>
+            <button onclick="setBothEnabled()">Enable Both</button>
+            <button onclick="setBothDisabled()">Disable Both</button>
+            <button onclick="setAlwaysOnTopOnly()">Always-On-Top Only</button>
+            <button onclick="setSkipTaskbarOnly()">Hide-From-Taskbar Only</button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h3>Individual Controls</h3>
+            <button onclick="toggleAlwaysOnTop()">Toggle Always-On-Top</button>
+            <button onclick="toggleSkipTaskbar()">Toggle Hide-From-Taskbar</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Verification Steps</h2>
+        <ol>
+            <li><strong>Test Simultaneous Operation:</strong>
+                <ul>
+                    <li>Click "Enable Both"</li>
+                    <li>Open another application (e.g., browser)</li>
+                    <li>Verify: Window stays on top AND is hidden from taskbar</li>
+                </ul>
+            </li>
+            <li><strong>Test Always-On-Top Independence:</strong>
+                <ul>
+                    <li>Click "Enable Both"</li>
+                    <li>Click "Toggle Always-On-Top" to disable it</li>
+                    <li>Verify: Window can now be covered by other windows</li>
+                    <li>Verify: Window is STILL hidden from taskbar</li>
+                </ul>
+            </li>
+            <li><strong>Test Hide-From-Taskbar Independence:</strong>
+                <ul>
+                    <li>Click "Enable Both"</li>
+                    <li>Click "Toggle Hide-From-Taskbar" to disable it</li>
+                    <li>Verify: Window now appears in taskbar</li>
+                    <li>Verify: Window STILL stays on top of other windows</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <script type="module">
+        import { invoke } from '@tauri-apps/api/core';
+        import Database from '@tauri-apps/plugin-sql';
+
+        let db = null;
+
+        async function getDatabase() {
+            if (!db) {
+                db = await Database.load('sqlite:dontcaught.db');
+            }
+            return db;
+        }
+
+        async function getAlwaysOnTopSetting() {
+            const database = await getDatabase();
+            const result = await database.select("SELECT value FROM app_settings WHERE key = 'always_on_top'");
+            return result.length > 0 ? result[0].value === 'true' : true;
+        }
+
+        async function saveAlwaysOnTopSetting(value) {
+            const database = await getDatabase();
+            const stringValue = value ? 'true' : 'false';
+            await database.execute(
+                "INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES ('always_on_top', $1, datetime('now'))",
+                [stringValue]
+            );
+            await invoke('set_always_on_top', { alwaysOnTop: value });
+        }
+
+        async function getSkipTaskbarSetting() {
+            const database = await getDatabase();
+            const result = await database.select("SELECT value FROM app_settings WHERE key = 'skip_taskbar'");
+            return result.length > 0 ? result[0].value === 'true' : true;
+        }
+
+        async function saveSkipTaskbarSetting(value) {
+            const database = await getDatabase();
+            const stringValue = value ? 'true' : 'false';
+            await database.execute(
+                "INSERT OR REPLACE INTO app_settings (key, value, updated_at) VALUES ('skip_taskbar', $1, datetime('now'))",
+                [stringValue]
+            );
+            await invoke('set_skip_taskbar', { skip: value });
+        }
+
+        function addResult(message, isSuccess) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testSimultaneousFeatures() {
+            try {
+                await saveAlwaysOnTopSetting(true);
+                await saveSkipTaskbarSetting(true);
+                
+                const alwaysOnTop = await getAlwaysOnTopSetting();
+                const skipTaskbar = await getSkipTaskbarSetting();
+                
+                if (alwaysOnTop && skipTaskbar) {
+                    addResult('✓ Test 1 Passed: Both features can be enabled simultaneously', true);
+                    return true;
+                } else {
+                    addResult(`✗ Test 1 Failed: Expected both true, got alwaysOnTop=${alwaysOnTop}, skipTaskbar=${skipTaskbar}`, false);
+                    return false;
+                }
+            } catch (error) {
+                addResult(`✗ Test 1 Error: ${error.message}`, false);
+                return false;
+            }
+        }
+
+        async function testAlwaysOnTopIndependence() {
+            try {
+                await saveAlwaysOnTopSetting(true);
+                await saveSkipTaskbarSetting(true);
+                await saveAlwaysOnTopSetting(false);
+                
+                const alwaysOnTop = await getAlwaysOnTopSetting();
+                const skipTaskbar = await getSkipTaskbarSetting();
+                
+                if (!alwaysOnTop && skipTaskbar) {
+                    addResult('✓ Test 2 Passed: Changing always-on-top does not affect skip-taskbar', true);
+                    return true;
+                } else {
+                    addResult(`✗ Test 2 Failed: Expected alwaysOnTop=false, skipTaskbar=true, got alwaysOnTop=${alwaysOnTop}, skipTaskbar=${skipTaskbar}`, false);
+                    return false;
+                }
+            } catch (error) {
+                addResult(`✗ Test 2 Error: ${error.message}`, false);
+                return false;
+            }
+        }
+
+        async function testSkipTaskbarIndependence() {
+            try {
+                await saveAlwaysOnTopSetting(true);
+                await saveSkipTaskbarSetting(true);
+                await saveSkipTaskbarSetting(false);
+                
+                const alwaysOnTop = await getAlwaysOnTopSetting();
+                const skipTaskbar = await getSkipTaskbarSetting();
+                
+                if (alwaysOnTop && !skipTaskbar) {
+                    addResult('✓ Test 3 Passed: Changing skip-taskbar does not affect always-on-top', true);
+                    return true;
+                } else {
+                    addResult(`✗ Test 3 Failed: Expected alwaysOnTop=true, skipTaskbar=false, got alwaysOnTop=${alwaysOnTop}, skipTaskbar=${skipTaskbar}`, false);
+                    return false;
+                }
+            } catch (error) {
+                addResult(`✗ Test 3 Error: ${error.message}`, false);
+                return false;
+            }
+        }
+
+        async function testAllCombinations() {
+            const combinations = [
+                { alwaysOnTop: true, skipTaskbar: true },
+                { alwaysOnTop: true, skipTaskbar: false },
+                { alwaysOnTop: false, skipTaskbar: true },
+                { alwaysOnTop: false, skipTaskbar: false },
+            ];
+            
+            try {
+                for (const combo of combinations) {
+                    await saveAlwaysOnTopSetting(combo.alwaysOnTop);
+                    await saveSkipTaskbarSetting(combo.skipTaskbar);
+                    
+                    const retrievedAlwaysOnTop = await getAlwaysOnTopSetting();
+                    const retrievedSkipTaskbar = await getSkipTaskbarSetting();
+                    
+                    if (retrievedAlwaysOnTop !== combo.alwaysOnTop || retrievedSkipTaskbar !== combo.skipTaskbar) {
+                        addResult(`✗ Test 4 Failed: Combination (${combo.alwaysOnTop}, ${combo.skipTaskbar}) failed`, false);
+                        return false;
+                    }
+                }
+                addResult('✓ Test 4 Passed: All setting combinations work correctly', true);
+                return true;
+            } catch (error) {
+                addResult(`✗ Test 4 Error: ${error.message}`, false);
+                return false;
+            }
+        }
+
+        window.runAllTests = async function() {
+            const button = document.getElementById('runTests');
+            button.disabled = true;
+            clearResults();
+            
+            addResult('Running feature interaction tests...', true);
+            
+            const results = await Promise.all([
+                testSimultaneousFeatures(),
+                testAlwaysOnTopIndependence(),
+                testSkipTaskbarIndependence(),
+                testAllCombinations()
+            ]);
+            
+            const allPassed = results.every(r => r);
+            if (allPassed) {
+                addResult('=== All Tests Passed ===', true);
+            } else {
+                addResult('=== Some Tests Failed ===', false);
+            }
+            
+            button.disabled = false;
+        };
+
+        window.clearResults = function() {
+            document.getElementById('testResults').innerHTML = '';
+        };
+
+        window.refreshSettings = async function() {
+            try {
+                const alwaysOnTop = await getAlwaysOnTopSetting();
+                const skipTaskbar = await getSkipTaskbarSetting();
+                
+                document.getElementById('currentAlwaysOnTop').textContent = alwaysOnTop ? 'Enabled' : 'Disabled';
+                document.getElementById('currentSkipTaskbar').textContent = skipTaskbar ? 'Enabled' : 'Disabled';
+            } catch (error) {
+                alert('Error refreshing settings: ' + error.message);
+            }
+        };
+
+        window.setBothEnabled = async function() {
+            await saveAlwaysOnTopSetting(true);
+            await saveSkipTaskbarSetting(true);
+            await refreshSettings();
+            alert('Both features enabled');
+        };
+
+        window.setBothDisabled = async function() {
+            await saveAlwaysOnTopSetting(false);
+            await saveSkipTaskbarSetting(false);
+            await refreshSettings();
+            alert('Both features disabled');
+        };
+
+        window.setAlwaysOnTopOnly = async function() {
+            await saveAlwaysOnTopSetting(true);
+            await saveSkipTaskbarSetting(false);
+            await refreshSettings();
+            alert('Always-on-top enabled, hide-from-taskbar disabled');
+        };
+
+        window.setSkipTaskbarOnly = async function() {
+            await saveAlwaysOnTopSetting(false);
+            await saveSkipTaskbarSetting(true);
+            await refreshSettings();
+            alert('Always-on-top disabled, hide-from-taskbar enabled');
+        };
+
+        window.toggleAlwaysOnTop = async function() {
+            const current = await getAlwaysOnTopSetting();
+            await saveAlwaysOnTopSetting(!current);
+            await refreshSettings();
+            alert(`Always-on-top ${!current ? 'enabled' : 'disabled'}`);
+        };
+
+        window.toggleSkipTaskbar = async function() {
+            const current = await getSkipTaskbarSetting();
+            await saveSkipTaskbarSetting(!current);
+            await refreshSettings();
+            alert(`Hide-from-taskbar ${!current ? 'enabled' : 'disabled'}`);
+        };
+
+        // Initialize
+        refreshSettings();
+    </script>
+</body>
+</html>

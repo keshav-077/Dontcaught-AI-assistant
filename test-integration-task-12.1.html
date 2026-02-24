@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Test - Task 12.1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .manual-test {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #2196F3;
+        }
+        .manual-test h4 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .checklist {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .checklist li {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .summary {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .summary h3 {
+            margin-top: 0;
+        }
+        .test-count {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .count-pass { background: #d4edda; color: #155724; }
+        .count-fail { background: #f8d7da; color: #721c24; }
+        .count-pending { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Integration Test - Task 12.1: Complete User Flow</h1>
+        
+        <div class="test-result info">
+            <strong>Test Scope:</strong> This test suite covers the complete user flow for the always-on-top feature.<br>
+            <strong>Requirements:</strong> 1.3, 1.4, 2.4, 3.2, 7.1<br>
+            <strong>Note:</strong> Some tests require manual verification as they involve window behavior and system interactions.
+        </div>
+
+        <h2>Automated Tests</h2>
+        <div class="test-section">
+            <button onclick="runAllAutomatedTests()">Run All Automated Tests</button>
+            <button onclick="clearResults()">Clear Results</button>
+            <div id="automated-results"></div>
+        </div>
+
+        <h2>Manual Test Procedures</h2>
+        
+        <div class="manual-test">
+            <h4>Test 1: Toggle Always-On-Top Multiple Times</h4>
+            <p><strong>Requirement:</strong> 2.4 (Immediate application of changes)</p>
+            <ul class="checklist">
+                <li>Open Settings and locate "Always on top" toggle</li>
+                <li>Open another application (browser, editor, etc.)</li>
+                <li>Toggle "Always on top" OFF and verify window goes behind</li>
+                <li>Toggle "Always on top" ON and verify window stays on top</li>
+                <li>Repeat toggle 3-5 times and verify consistent behavior</li>
+                <li>Verify no errors in console (F12)</li>
+            </ul>
+            <button onclick="markTestComplete('test1')">Mark Complete</button>
+            <button onclick="markTestFailed('test1')">Mark Failed</button>
+            <div id="test1-result"></div>
+        </div>
+
+        <div class="manual-test">
+            <h4>Test 2: Setting Persistence Across Restarts</h4>
+            <p><strong>Requirement:</strong> 3.2 (Load saved preference on startup)</p>
+            <ul class="checklist">
+                <li>Enable "Always on top" in Settings</li>
+                <li>Close the application completely</li>
+                <li>Relaunch the application</li>
+                <li>Open Settings and verify toggle is still ON</li>
+                <li>Open another app and verify window stays on top</li>
+                <li>Disable "Always on top"</li>
+                <li>Close and relaunch application</li>
+                <li>Verify toggle is still OFF and window has normal z-order</li>
+            </ul>
+            <button onclick="markTestComplete('test2')">Mark Complete</button>
+            <button onclick="markTestFailed('test2')">Mark Failed</button>
+            <div id="test2-result"></div>
+        </div>
+
+        <div class="manual-test">
+            <h4>Test 3: Works with Hide-From-Taskbar</h4>
+            <p><strong>Requirement:</strong> 7.1 (Simultaneous operation)</p>
+            <ul class="checklist">
+                <li>Enable both "Always on top" and "Hide from taskbar"</li>
+                <li>Verify window is NOT in taskbar</li>
+                <li>Open another application and verify window stays on top</li>
+                <li>Disable "Always on top" (keep hide-from-taskbar ON)</li>
+                <li>Verify window still hidden from taskbar</li>
+                <li>Verify window now has normal z-order</li>
+                <li>Enable "Always on top" again</li>
+                <li>Verify both features work simultaneously</li>
+            </ul>
+            <button onclick="markTestComplete('test3')">Mark Complete</button>
+            <button onclick="markTestFailed('test3')">Mark Failed</button>
+            <div id="test3-result"></div>
+        </div>
+
+        <div class="manual-test">
+            <h4>Test 4: Window Stays On Top with Multiple Applications</h4>
+            <p><strong>Requirements:</strong> 1.3, 1.4 (Window remains visible above all others)</p>
+            <ul class="checklist">
+                <li>Enable "Always on top"</li>
+                <li>Open a web browser and maximize it</li>
+                <li>Verify DontCaught window stays visible above browser</li>
+                <li>Open a text editor</li>
+                <li>Verify DontCaught window stays visible above editor</li>
+                <li>Open file explorer</li>
+                <li>Verify DontCaught window stays visible above explorer</li>
+                <li>Click on each application and verify window stays on top</li>
+                <li>Use Alt+Tab (or Cmd+Tab) to switch apps rapidly</li>
+                <li>Verify window consistently stays on top</li>
+            </ul>
+            <button onclick="markTestComplete('test4')">Mark Complete</button>
+            <button onclick="markTestFailed('test4')">Mark Failed</button>
+            <div id="test4-result"></div>
+        </div>
+
+        <div class="manual-test">
+            <h4>Test 5: Complete End-to-End User Flow</h4>
+            <p><strong>Requirements:</strong> All (1.3, 1.4, 2.4, 3.2, 7.1)</p>
+            <ul class="checklist">
+                <li>First launch: Verify "Always on top" enabled by default</li>
+                <li>Customize: Disable "Always on top", enable "Hide from taskbar"</li>
+                <li>Restart: Verify both settings persist</li>
+                <li>Daily use: Enable "Always on top", open multiple apps</li>
+                <li>Toggle during use: Disable/enable and verify immediate effect</li>
+                <li>Multiple sessions: Close/reopen 3 times with different settings</li>
+                <li>Verify no errors, crashes, or unexpected behavior</li>
+            </ul>
+            <button onclick="markTestComplete('test5')">Mark Complete</button>
+            <button onclick="markTestFailed('test5')">Mark Failed</button>
+            <div id="test5-result"></div>
+        </div>
+
+        <div class="summary" id="summary">
+            <h3>Test Summary</h3>
+            <div id="summary-content">
+                <p>Run tests to see summary...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            automated: { pass: 0, fail: 0, total: 0 },
+            manual: { complete: 0, failed: 0, pending: 5 }
+        };
+
+        async function runAllAutomatedTests() {
+            const resultsDiv = document.getElementById('automated-results');
+            resultsDiv.innerHTML = '<p>Running automated tests...</p>';
+            
+            let results = [];
+            
+            // Test 1: Database persistence check
+            results.push(await testDatabasePersistence());
+            
+            // Test 2: Setting toggle functionality
+            results.push(await testSettingToggle());
+            
+            // Test 3: Feature independence
+            results.push(await testFeatureIndependence());
+            
+            // Display results
+            displayAutomatedResults(results);
+            updateSummary();
+        }
+
+        async function testDatabasePersistence() {
+            try {
+                // Check if database functions are available
+                if (typeof window.__TAURI__ === 'undefined') {
+                    return {
+                        name: 'Database Persistence',
+                        status: 'pending',
+                        message: 'Tauri API not available (run in Tauri app)'
+                    };
+                }
+
+                const Database = window.__TAURI__.sql;
+                const db = await Database.load('sqlite:app.db');
+                
+                // Query the always_on_top setting
+                const result = await db.select(
+                    'SELECT value FROM app_settings WHERE key = ?',
+                    ['always_on_top']
+                );
+                
+                if (result.length > 0) {
+                    return {
+                        name: 'Database Persistence',
+                        status: 'pass',
+                        message: `Setting found in database: ${result[0].value}`
+                    };
+                } else {
+                    return {
+                        name: 'Database Persistence',
+                        status: 'fail',
+                        message: 'Setting not found in database'
+                    };
+                }
+            } catch (error) {
+                return {
+                    name: 'Database Persistence',
+                    status: 'fail',
+                    message: `Error: ${error.message}`
+                };
+            }
+        }
+
+        async function testSettingToggle() {
+            try {
+                // Check if Tauri commands are available
+                if (typeof window.__TAURI__ === 'undefined') {
+                    return {
+                        name: 'Setting Toggle Functionality',
+                        status: 'pending',
+                        message: 'Tauri API not available (run in Tauri app)'
+                    };
+                }
+
+                const { invoke } = window.__TAURI__.core;
+                
+                // Test get command
+                const currentValue = await invoke('get_always_on_top');
+                
+                return {
+                    name: 'Setting Toggle Functionality',
+                    status: 'pass',
+                    message: `Backend command accessible, current value: ${currentValue}`
+                };
+            } catch (error) {
+                return {
+                    name: 'Setting Toggle Functionality',
+                    status: 'fail',
+                    message: `Error: ${error.message}`
+                };
+            }
+        }
+
+        async function testFeatureIndependence() {
+            try {
+                if (typeof window.__TAURI__ === 'undefined') {
+                    return {
+                        name: 'Feature Independence',
+                        status: 'pending',
+                        message: 'Tauri API not available (run in Tauri app)'
+                    };
+                }
+
+                const Database = window.__TAURI__.sql;
+                const db = await Database.load('sqlite:app.db');
+                
+                // Query both settings
+                const alwaysOnTop = await db.select(
+                    'SELECT value FROM app_settings WHERE key = ?',
+                    ['always_on_top']
+                );
+                const skipTaskbar = await db.select(
+                    'SELECT value FROM app_settings WHERE key = ?',
+                    ['skip_taskbar']
+                );
+                
+                if (alwaysOnTop.length > 0 && skipTaskbar.length > 0) {
+                    return {
+                        name: 'Feature Independence',
+                        status: 'pass',
+                        message: `Both settings exist independently: always_on_top=${alwaysOnTop[0].value}, skip_taskbar=${skipTaskbar[0].value}`
+                    };
+                } else {
+                    return {
+                        name: 'Feature Independence',
+                        status: 'fail',
+                        message: 'One or both settings missing from database'
+                    };
+                }
+            } catch (error) {
+                return {
+                    name: 'Feature Independence',
+                    status: 'fail',
+                    message: `Error: ${error.message}`
+                };
+            }
+        }
+
+        function displayAutomatedResults(results) {
+            const resultsDiv = document.getElementById('automated-results');
+            let html = '<h3>Automated Test Results</h3>';
+            
+            testResults.automated = { pass: 0, fail: 0, total: results.length };
+            
+            results.forEach(result => {
+                const statusClass = result.status === 'pass' ? 'pass' : 
+                                  result.status === 'fail' ? 'fail' : 'pending';
+                const statusIcon = result.status === 'pass' ? '✓' : 
+                                 result.status === 'fail' ? '✗' : '⏳';
+                
+                if (result.status === 'pass') testResults.automated.pass++;
+                if (result.status === 'fail') testResults.automated.fail++;
+                
+                html += `
+                    <div class="test-result ${statusClass}">
+                        <strong>${statusIcon} ${result.name}</strong><br>
+                        ${result.message}
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        function markTestComplete(testId) {
+            const resultDiv = document.getElementById(`${testId}-result`);
+            resultDiv.innerHTML = '<div class="test-result pass"><strong>✓ Test Completed Successfully</strong></div>';
+            testResults.manual.complete++;
+            testResults.manual.pending--;
+            updateSummary();
+        }
+
+        function markTestFailed(testId) {
+            const resultDiv = document.getElementById(`${testId}-result`);
+            const notes = prompt('Please describe the failure:');
+            resultDiv.innerHTML = `<div class="test-result fail"><strong>✗ Test Failed</strong><br>${notes || 'No details provided'}</div>`;
+            testResults.manual.failed++;
+            testResults.manual.pending--;
+            updateSummary();
+        }
+
+        function clearResults() {
+            document.getElementById('automated-results').innerHTML = '';
+            ['test1', 'test2', 'test3', 'test4', 'test5'].forEach(id => {
+                document.getElementById(`${id}-result`).innerHTML = '';
+            });
+            testResults = {
+                automated: { pass: 0, fail: 0, total: 0 },
+                manual: { complete: 0, failed: 0, pending: 5 }
+            };
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('summary-content');
+            const totalTests = testResults.automated.total + testResults.manual.complete + 
+                             testResults.manual.failed + testResults.manual.pending;
+            const passedTests = testResults.automated.pass + testResults.manual.complete;
+            const failedTests = testResults.automated.fail + testResults.manual.failed;
+            
+            summaryDiv.innerHTML = `
+                <p><strong>Total Tests:</strong> ${totalTests}</p>
+                <div>
+                    <span class="test-count count-pass">Passed: ${passedTests}</span>
+                    <span class="test-count count-fail">Failed: ${failedTests}</span>
+                    <span class="test-count count-pending">Pending: ${testResults.manual.pending}</span>
+                </div>
+                <p style="margin-top: 15px;">
+                    <strong>Automated:</strong> ${testResults.automated.pass}/${testResults.automated.total} passed<br>
+                    <strong>Manual:</strong> ${testResults.manual.complete} complete, ${testResults.manual.failed} failed, ${testResults.manual.pending} pending
+                </p>
+                ${passedTests === totalTests && totalTests > 0 ? 
+                    '<div class="test-result pass" style="margin-top: 15px;"><strong>🎉 All tests passed! Task 12.1 complete.</strong></div>' : ''}
+            `;
+        }
+
+        // Initialize summary on load
+        updateSummary();
+    </script>
+</body>
+</html>

@@ -29,6 +29,16 @@ pub fn setup_main_window(app: &mut App) -> Result<(), Box<dyn std::error::Error>
         }
     });
 
+    // Load and apply saved always-on-top preference
+    let window_clone = window.clone();
+    tauri::async_runtime::spawn(async move {
+        // Default to true (always on top) on startup
+        // The frontend will load the actual saved preference and update if needed
+        if let Err(e) = window_clone.set_always_on_top(true) {
+            eprintln!("Failed to apply default always_on_top setting on startup: {}", e);
+        }
+    });
+
     // Set window as non-focusable on Windows
     // #[cfg(target_os = "windows")]
     // {
@@ -250,6 +260,37 @@ pub fn set_skip_taskbar(
     window
         .set_skip_taskbar(skip)
         .map_err(|e| format!("Failed to set window skip_taskbar property: {}", e))?;
+
+    // Database persistence is handled by the frontend using tauri-plugin-sql
+    // This ensures the setting is applied immediately to the window
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_always_on_top() -> Result<bool, String> {
+    // This command is now a simple getter that returns the default value
+    // The actual database operations are handled by the frontend using tauri-plugin-sql
+    // This command exists for compatibility and returns the default value
+    Ok(true)
+}
+
+#[tauri::command]
+pub fn set_always_on_top(
+    window: tauri::WebviewWindow,
+    always_on_top: bool,
+) -> Result<(), String> {
+    // Update the window's always_on_top property immediately
+    window
+        .set_always_on_top(always_on_top)
+        .map_err(|e| {
+            let error_msg = e.to_string();
+            // Check for platform-specific unsupported errors
+            if error_msg.contains("not supported") || error_msg.contains("unsupported") {
+                format!("Always-on-top is not supported on this platform: {}", error_msg)
+            } else {
+                format!("Failed to set window always_on_top property: {}", error_msg)
+            }
+        })?;
 
     // Database persistence is handled by the frontend using tauri-plugin-sql
     // This ensures the setting is applied immediately to the window

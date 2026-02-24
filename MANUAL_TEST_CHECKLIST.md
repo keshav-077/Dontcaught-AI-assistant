@@ -130,6 +130,55 @@
 
 ---
 
+### Test 10: Feature Interaction - Always-On-Top and Hide-From-Taskbar
+**Expected Result:** Both features should work independently and simultaneously
+
+#### Test 10.1: Simultaneous Operation (Requirement 7.1)
+- [ ] Enable both "Always on top" and "Hide from taskbar"
+- [ ] Open another application (e.g., browser, text editor)
+- [ ] Verify: Window stays on top of the other application
+- [ ] Verify: Window is NOT visible in the taskbar
+- [ ] Both features work simultaneously without conflicts
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 10.2: Always-On-Top Independence (Requirement 7.2)
+- [ ] Enable both features
+- [ ] Disable "Always on top" toggle
+- [ ] Verify: Window can now be covered by other windows
+- [ ] Verify: Window is STILL hidden from taskbar
+- [ ] Changing always-on-top does not affect hide-from-taskbar
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 10.3: Hide-From-Taskbar Independence (Requirement 7.3)
+- [ ] Enable both features
+- [ ] Disable "Hide from taskbar" toggle
+- [ ] Verify: Window now appears in taskbar
+- [ ] Verify: Window STILL stays on top of other windows
+- [ ] Changing hide-from-taskbar does not affect always-on-top
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 10.4: All Combinations
+- [ ] Test combination: Both enabled
+- [ ] Test combination: Always-on-top only
+- [ ] Test combination: Hide-from-taskbar only
+- [ ] Test combination: Both disabled
+- [ ] All combinations work correctly
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 10.5: Automated Test Suite
+- [ ] Open test-feature-interaction.html in the application
+- [ ] Click "Run All Tests" button
+- [ ] Verify all automated tests pass
+- [ ] No errors in console
+
+**Status:** ⏳ Pending Automated Test Execution
+
+---
+
 ## Build Verification
 
 ### Frontend Build
@@ -206,6 +255,82 @@
 
 ---
 
+### Test 11: Always-On-Top Window Properties Preservation (Task 10.1)
+**Expected Result:** Window properties should remain unchanged when toggling always-on-top
+
+**Requirements:** 6.1 (Position), 6.2 (Size), 6.3 (Other Properties)
+
+#### Test 11.1: Position Preservation
+- [ ] Note the current window position on screen
+- [ ] Toggle "Always on top" OFF
+- [ ] Verify window position has NOT changed
+- [ ] Toggle "Always on top" ON
+- [ ] Verify window position has NOT changed
+- [ ] Position remains constant throughout (Requirement 6.1)
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 11.2: Size Preservation
+- [ ] Note the current window size (width x height)
+- [ ] Toggle "Always on top" OFF
+- [ ] Verify window size has NOT changed
+- [ ] Toggle "Always on top" ON
+- [ ] Verify window size has NOT changed
+- [ ] Size remains constant throughout (Requirement 6.2)
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 11.3: Taskbar Visibility Preservation
+- [ ] Set "Hide from taskbar" to ON
+- [ ] Verify window is hidden from taskbar
+- [ ] Toggle "Always on top" OFF
+- [ ] Verify window is STILL hidden from taskbar
+- [ ] Toggle "Always on top" ON
+- [ ] Verify window is STILL hidden from taskbar
+- [ ] Taskbar visibility independent of always-on-top (Requirement 6.3)
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 11.4: Multiple Properties Simultaneously
+- [ ] Set known position and size
+- [ ] Set "Hide from taskbar" to ON
+- [ ] Toggle "Always on top" OFF and ON 5 times rapidly
+- [ ] Verify position unchanged after all toggles
+- [ ] Verify size unchanged after all toggles
+- [ ] Verify taskbar visibility unchanged after all toggles
+- [ ] No visual glitches or flickers observed
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 11.5: Always-On-Top Functionality Verification
+- [ ] Enable "Always on top"
+- [ ] Open another application (browser, editor, etc.)
+- [ ] Click on the other application
+- [ ] Verify: DontCaught window stays on top
+- [ ] Verify: Window position unchanged
+- [ ] Verify: Window size unchanged
+- [ ] Disable "Always on top"
+- [ ] Click on another application
+- [ ] Verify: DontCaught window goes behind
+- [ ] Verify: Window position unchanged when brought back
+
+**Status:** ⏳ Pending Manual Verification
+
+#### Test 11.6: Interactive Test Page
+- [ ] Open test-window-properties-preservation.html (if integrated)
+- [ ] Click "Capture Initial State"
+- [ ] Click "Toggle Always On Top"
+- [ ] Click "Verify Properties Preserved"
+- [ ] Verify all checks pass (position, size preserved)
+- [ ] Repeat toggle and verify 3 more times
+- [ ] All automated checks pass
+
+**Status:** ⏳ Pending Interactive Test Execution
+
+**Detailed Checklist:** See WINDOW_PROPERTIES_TEST_CHECKLIST.md for comprehensive test procedures
+
+---
+
 ## Notes
 
 - All required tasks (1-8, 11) have been completed
@@ -214,3 +339,10 @@
 - Frontend build is successful with no critical errors
 - Backend implementation is complete and commands are properly registered
 - Manual testing is required to verify end-to-end functionality
+- Feature interaction tests added to verify independence of always-on-top and hide-from-taskbar
+- Automated test suite available at test-feature-interaction.html
+- Window properties preservation tests added for Task 10.1 (Requirements 6.1, 6.2, 6.3)
+- Comprehensive test checklist available at WINDOW_PROPERTIES_TEST_CHECKLIST.md
+- Interactive test page available at test-window-properties-preservation.html
+- **Task 12.1 Integration Tests:** See INTEGRATION_TEST_TASK_12.1.md for complete user flow testing
+- **Task 12.1 Interactive Test:** See test-integration-task-12.1.html for guided integration testing

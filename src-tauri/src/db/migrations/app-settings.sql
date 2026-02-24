@@ -22,3 +22,6 @@ END;
 
 -- Insert default value for skip_taskbar (true = hide from taskbar)
 INSERT OR IGNORE INTO app_settings (key, value) VALUES ('skip_taskbar', 'true');
+
+-- Insert default value for always_on_top (true = stay on top)
+INSERT OR IGNORE INTO app_settings (key, value) VALUES ('always_on_top', 'true');
